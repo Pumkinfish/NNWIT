@@ -16,6 +16,8 @@ import mcp.mobius.waila.api.__internal__.IApiService;
 import mcp.mobius.waila.api.component.GrowingComponent;
 import mcp.mobius.waila.api.component.PairComponent;
 import mcp.mobius.waila.buildconst.Tl;
+import mcp.mobius.waila.plugin.harvest.HarvestDropRuleHelper;
+import mcp.mobius.waila.plugin.harvest.component.SilkTouchComponent;
 import mcp.mobius.waila.plugin.harvest.component.ToolComponent;
 import mcp.mobius.waila.plugin.harvest.config.HarvestDisplayMode;
 import mcp.mobius.waila.plugin.harvest.config.Options;
@@ -65,7 +67,8 @@ public enum HarvestProvider implements IBlockComponentProvider, IEventListener {
         updateId = accessor.getUpdateId();
         state = accessor.getBlockState();
 
-        var unbreakable = state.getDestroySpeed(accessor.getLevel(), accessor.getPosition()) < 0;
+        var neverDrops = HarvestDropRuleHelper.neverDrops(state);
+        var unbreakable = state.getDestroySpeed(accessor.getLevel(), accessor.getPosition()) < 0 || neverDrops;
 
         var tools = toolsCache.get(state);
         if (tools == null) {
@@ -106,9 +109,15 @@ public enum HarvestProvider implements IBlockComponentProvider, IEventListener {
                 .append(" ")
                 .append(Component.translatable(Tl.Tooltip.Harvest.HARVESTABLE)));
 
-            if (!tools.isEmpty() && !unbreakable) tooltip.setLine(CLASSIC_EFFECTIVE_TOOL, new PairComponent(
-                Component.translatable(Tl.Tooltip.Harvest.EFFECTIVE_TOOL),
-                getToolText(tools, heldStack)));
+            if (!tools.isEmpty() && !unbreakable) {
+                tooltip.setLine(CLASSIC_EFFECTIVE_TOOL, new PairComponent(
+                    Component.translatable(Tl.Tooltip.Harvest.EFFECTIVE_TOOL),
+                    getToolText(tools, heldStack, state)));
+            } else if (!unbreakable && HarvestDropRuleHelper.needsSilkTouch(state)) {
+                tooltip.setLine(CLASSIC_EFFECTIVE_TOOL, new PairComponent(
+                    Component.translatable(Tl.Tooltip.Harvest.EFFECTIVE_TOOL),
+                    Component.literal("Silk Touch").withStyle(ChatFormatting.GREEN)));
+            }
 
             if (highestTier != ToolTier.NONE) tooltip.setLine(CLASSIC_LEVEL, new PairComponent(
                 Component.translatable(Tl.Tooltip.Harvest.LEVEL),
@@ -118,7 +127,12 @@ public enum HarvestProvider implements IBlockComponentProvider, IEventListener {
             text.append(getHarvestableSymbol(accessor, unbreakable));
 
             if (!tools.isEmpty() && !unbreakable) {
-                text.append(" | ").append(getToolText(tools, heldStack));
+                text.append(" | ").append(getToolText(tools, heldStack, state));
+                if (highestTier != ToolTier.NONE) {
+                    text.append(" | ");
+                }
+            } else if (!unbreakable && HarvestDropRuleHelper.needsSilkTouch(state)) {
+                text.append(" | ").append(Component.literal("Silk Touch").withStyle(ChatFormatting.GREEN));
                 if (highestTier != ToolTier.NONE) {
                     text.append(" | ");
                 }
@@ -142,6 +156,11 @@ public enum HarvestProvider implements IBlockComponentProvider, IEventListener {
         if (displayMode != HarvestDisplayMode.MODERN) return;
 
         if (updateId != accessor.getUpdateId()) return;
+
+        var needsSilkTouch = HarvestDropRuleHelper.needsSilkTouch(state);
+        if (needsSilkTouch && tooltip.getLineCount() > 0) {
+            tooltip.getLine(0).with(new SilkTouchComponent());
+        }
 
         var tools = toolsCache.get(state);
         var highestTier = tierCache.get(state);
@@ -192,7 +211,7 @@ public enum HarvestProvider implements IBlockComponentProvider, IEventListener {
             : Component.literal("\u2714").withStyle(ChatFormatting.GREEN);
     }
 
-    private static MutableComponent getToolText(List<ToolType> tools, ItemStack heldStack) {
+    private static MutableComponent getToolText(List<ToolType> tools, ItemStack heldStack, BlockState state) {
         var toolText = Component.empty();
         var toolIter = tools.iterator();
         while (toolIter.hasNext()) {
@@ -201,6 +220,9 @@ public enum HarvestProvider implements IBlockComponentProvider, IEventListener {
 
             toolText.append(tool.text.copy().withStyle(tool.itemPredicate.test(heldStack) ? ChatFormatting.GREEN : ChatFormatting.RED));
             if (toolIter.hasNext()) toolText.append(", ");
+        }
+        if (HarvestDropRuleHelper.needsSilkTouch(state)) {
+            toolText.append(" (Silk Touch)");
         }
         return toolText;
     }
