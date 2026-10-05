@@ -113,3 +113,9 @@ afterEvaluate {
         }
     }
 }
+
+base {
+    archivesName.set("nnwit-fabric")
+}
+
+version = "1.1.0"
