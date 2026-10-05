@@ -1,0 +1,39 @@
+package mcp.mobius.waila.service;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import mcp.mobius.waila.WailaClient;
+import mcp.mobius.waila.config.JsonConfig;
+import mcp.mobius.waila.config.PluginConfig;
+import mcp.mobius.waila.mixed.IMixinService;
+import mcp.mobius.waila.registry.RegistryFilter;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.world.item.ToolMaterial;
+
+public class MixinService implements IMixinService {
+
+    public static final Map<ToolMaterial, Class<?>> TOOL_MATERIALS = new LinkedHashMap<>();
+
+    @Override
+    public void attachRegistryFilter(RegistryAccess registryAccess) {
+        RegistryFilter.attach(registryAccess);
+    }
+
+    @Override
+    public void onServerLogin() {
+        WailaClient.onServerLogIn();
+    }
+
+    @Override
+    public void addToolMaterialInstance(ToolMaterial material, Class<?> caller) {
+        TOOL_MATERIALS.put(material, caller);
+    }
+
+    @Override
+    public void onLanguageReloaded() {
+        JsonConfig.reloadAllInstances();
+        PluginConfig.write();
+    }
+
+}

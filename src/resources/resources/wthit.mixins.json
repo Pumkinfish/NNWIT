@@ -1,0 +1,41 @@
+{
+  "required"          : true,
+  "minVersion"        : "0.8",
+  "package"           : "mcp.mobius.waila.mixin",
+  "compatibilityLevel": "JAVA_16",
+  "mixins"            : [
+    "AbstractFurnaceBlockEntityAccess",
+    "BaseContainerBlockEntityAccess",
+    "BeaconBlockEntityAccess",
+    "BeehiveBlockEntity$BeeDataAccess",
+    "BeehiveBlockEntityAccess",
+    "EntityAccess",
+    "LanguageMixin",
+    "LecternBlockEntityAccess",
+    "NoteBlockAccess",
+    "ReloadableServerResourcesMixin",
+    "ShearableBlocksMixin",
+    "ToolMaterialMixin"
+  ],
+  "client"            : [
+    "AbstractSelectionListAccess",
+    "BossHealthOverlayAccess",
+    "ClientConfigurationPacketListenerImplMixin",
+    "ClientPacketListenerMixin",
+    "EditBoxAccess",
+    "GameNarratorAccess",
+    "GuiGraphicsExtractorAccess",
+    "KeyBindsListMixin",
+    "KeyboardHandlerMixin",
+    "KeyMappingAccess",
+    "MouseHandlerMixin",
+    "MultiPlayerGameModeMixin",
+    "OptionsScreenMixin",
+    "PlayerTabOverlayAccess",
+    "ScissorStackMixin",
+    "TabNavigationBarAccess"
+  ],
+  "injectors"         : {
+    "defaultRequire": 1
+  }
+}
