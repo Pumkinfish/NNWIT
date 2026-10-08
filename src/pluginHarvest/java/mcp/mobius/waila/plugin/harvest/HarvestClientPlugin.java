@@ -10,6 +10,7 @@ public class HarvestClientPlugin implements IWailaClientPlugin {
     @Override
     public void register(IClientRegistrar registrar) {
         registrar.body(HarvestProvider.INSTANCE, Block.class);
+        registrar.body(ToolBreakBlockProvider.INSTANCE, Block.class);
         registrar.eventListener(HarvestProvider.INSTANCE, 3000);
     }
 

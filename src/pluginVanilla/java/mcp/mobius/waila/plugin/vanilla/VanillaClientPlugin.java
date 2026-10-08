@@ -119,6 +119,9 @@ public class VanillaClientPlugin implements IWailaClientPlugin {
 
         registrar.head(SpawnerProvider.INSTANCE, SpawnerBlockEntity.class, 950);
 
+        registrar.body(UsageBlockProvider.INSTANCE, Block.class);
+        registrar.body(HazardBlockProvider.INSTANCE, Block.class);
+
         registrar.body(PlantProvider.INSTANCE, CropBlock.class);
         registrar.body(PlantProvider.INSTANCE, StemBlock.class);
         registrar.body(PlantProvider.INSTANCE, CocoaBlock.class);
